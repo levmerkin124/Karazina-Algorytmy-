@@ -1,6 +1,9 @@
 #include <iostream>
 using namespace std;
 
+//добре, що написав через меню, так зручніше, гарно написані функції, у мене немає до них питань - 100/100
+
+
 struct Node {
     int data;
     Node* next;
