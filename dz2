@@ -1,0 +1,149 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+bool isEmpty(Node* head) {
+    return head == nullptr;
+}
+void deleteNode(Node*& head, int key) {
+    if (isEmpty(head)) return;
+
+    if (head->data == key) {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+        return;
+    }
+    
+    Node* curr = head;
+    while (curr->next && curr->next->data != key) {
+        curr = curr->next;
+    }
+    if (curr->next) {
+        Node* temp = curr->next;
+        curr->next = temp->next;
+        delete temp;
+    }
+}
+void insertBefore(Node*& head, int key, int newValue) {
+    if (isEmpty(head)) return;
+
+    Node* newNode = new Node{newValue, nullptr};
+
+    if (head->data == key) {
+        newNode->next = head;
+        head = newNode;
+        return;
+    }
+
+    Node* curr = head;
+    while (curr->next && curr->next->data != key) {
+        curr = curr->next;
+    }
+    if (curr->next) {
+        newNode->next = curr->next;
+        curr->next = newNode;
+    }
+}
+void insertAfter(Node* head, int key, int newValue) {
+    Node* curr = head;
+    while (curr && curr->data != key) {
+        curr = curr->next;
+    }
+    if (curr) {
+        Node* newNode = new Node{newValue, curr->next};
+        curr->next = newNode;
+    }
+}
+
+Node* search(Node* head, int key) {
+    Node* curr = head;
+    while (curr) {
+        if (curr->data == key) return curr;
+        curr = curr->next;
+    }
+    return nullptr;
+}
+
+void printList(Node* head) {
+    if (isEmpty(head)) {
+        cout << "Список порожній\n";
+        return;
+    }
+    while (head) {
+        cout << head->data << " -> ";
+        head = head->next;
+    }
+    cout << "NULL\n";
+}
+
+int main() {
+    Node* head = nullptr;
+
+    cout << "Скільки елементів додати у список? ";
+    int n; cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        int val;
+        cout << "Введіть елемент " << i + 1 << ": ";
+        cin >> val;
+        Node* newNode = new Node{val, head};
+        head = newNode;
+    }
+
+    cout << "\nВаш список:\n";
+    printList(head);
+
+    int choice;
+    do {
+        cout << "\nМеню:\n";
+        cout << "1. Видалити елемент\n";
+        cout << "2. Вставити перед елементом\n";
+        cout << "3. Вставити після елемента\n";
+        cout << "4. Пошук елемента\n";
+        cout << "5. Перевірити, чи список порожній\n";
+        cout << "6. Вивести список\n";
+        cout << "0. Вихід\n";
+        cout << "Ваш вибір: ";
+        cin >> choice;
+
+        int key, val;
+        switch (choice) {
+            case 1:
+                cout << "Введіть значення для видалення: ";
+                cin >> key;
+                deleteNode(head, key);
+                break;
+            case 2:
+                cout << "Введіть елемент ПЕРЕД яким вставити: ";
+                cin >> key;
+                cout << "Введіть нове значення: ";
+                cin >> val;
+                insertBefore(head, key, val);
+                break;
+            case 3:
+                cout << "Введіть елемент ПІСЛЯ якого вставити: ";
+                cin >> key;
+                cout << "Введіть нове значення: ";
+                cin >> val;
+                insertAfter(head, key, val);
+                break;
+            case 4:
+                cout << "Введіть значення для пошуку: ";
+                cin >> key;
+                cout << (search(head, key) ? "Елемент знайдено\n" : "Елемент не знайдено\n");
+                break;
+            case 5:
+                cout << (isEmpty(head) ? "Список порожній\n" : "Список НЕ порожній\n");
+                break;
+            case 6:
+                printList(head);
+                break;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
