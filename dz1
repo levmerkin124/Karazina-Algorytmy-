@@ -1,0 +1,54 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+};
+Node* createList() {
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    int x;
+    cout << "Введіть елементи списку";
+    while (cin >> x && x != 0) {
+        Node* newNode = new Node{x, nullptr};
+        if (!head) {
+            head = newNode;
+            tail = newNode;
+        } else {
+            tail->next = newNode;
+            tail = newNode;
+        }
+    }
+    return head;
+}
+void insertAfter(Node* head, int afterValue, int newValue) {
+    Node* curr = head;
+    while (curr && curr->data != afterValue) {
+        curr = curr->next;
+    }
+    if (curr) {
+        Node* newNode = new Node{newValue, curr->next};
+        curr->next = newNode;
+    } else {
+        cout << "Елемент " << afterValue << " не знайдено.\n";
+    }
+}
+void insertBefore(Node*& head, int beforeValue, int newValue) {
+    if (!head) return;
+    if (head->data == beforeValue) {
+        Node* newNode = new Node{newValue, head};
+        head = newNode;
+        return;
+    }
+    Node* curr = head;
+    while (curr->next && curr->next->data != beforeValue) {
+        curr = curr->next;
+    }
+    if (curr->next) {
+        Node* newNode = new Node{newValue, curr->next};
+        curr->next = newNode;
+    } else {
+        cout << "Елемент " << beforeValue << "не знайдено.\n";
+    }
+}
