@@ -1,0 +1,64 @@
+#include <iostream>
+#include <string>
+using namespace std;
+struct Student {
+    string name;
+    double grade;
+};
+struct TreeNode {
+  Student student;
+  TreeNode* leftChild;
+  TreeNode* rightChild;
+
+    TreeNode(Student s) : student(s), leftChild(nullptr), rightChild(nullptr) {}
+};
+
+TreeNode* addStudent(TreeNode* rootNode, Student newStudent) {
+    if (!rootNode)
+        return new TreeNode(newStudent);
+    if (newStudent.grade > rootNode->student.grade)
+        rootNode->leftChild = addStudent(rootNode->leftChild, newStudent);
+    else
+        rootNode->rightChild = addStudent(rootNode->rightChild, newStudent);
+    return rootNode;
+}
+
+TreeNode* findLowestGrade(TreeNode* rootNode) {
+    while (rootNode && rootNode->leftChild)
+        rootNode = rootNode->leftChild;
+    return rootNode;
+}
+
+TreeNode* deleteStudent(TreeNode* rootNode, double targetGrade) {
+    if (!rootNode)
+        return nullptr;
+    if (targetGrade > rootNode->student.grade)
+        rootNode->leftChild = deleteStudent(rootNode->leftChild, targetGrade);
+    else if (targetGrade < rootNode->student.grade)
+        rootNode->rightChild = deleteStudent(rootNode->rightChild, targetGrade);
+    else {
+        if (!rootNode->leftChild && !rootNode->rightChild) {
+            delete rootNode;
+            return nullptr;
+        } else if (!rootNode->leftChild) {
+            TreeNode* temp = rootNode->rightChild;
+            delete rootNode;
+            return temp;
+        } else if (!rootNode->rightChild) {
+            TreeNode* temp = rootNode->leftChild;
+            delete rootNode;
+            return temp;
+        } else {
+            TreeNode* minNode = findLowestGrade(rootNode->rightChild);
+            rootNode->student = minNode->student;
+            rootNode->rightChild = deleteStudent(rootNode->rightChild, minNode->student.grade);
+        }
+    }
+    return rootNode;
+}
+void printStudents(TreeNode* rootNode) {
+    if (!rootNode) return;
+    printStudents(rootNode->leftChild);
+    cout << rootNode->student.name << " — " << rootNode->student.grade << endl;
+    printStudents(rootNode->rightChild);
+}
