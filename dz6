@@ -1,0 +1,210 @@
+#include <iostream>
+#include <string>
+#include <cmath>
+using namespace std;
+
+
+class Product {
+public:
+    string name;
+    double price;
+    Product() {}
+    Product(string n, double p) : name(n), price(p) {}
+};
+
+class AVLTree {
+private:
+    struct Node {
+        double key;
+        Product product;
+        Node* left;
+        Node* right;
+        int height;
+
+        Node(double k, Product p)
+            : key(k), product(p), left(nullptr), right(nullptr), height(1) {}
+    };
+
+    Node* root = nullptr;
+    int height(Node* n) { return n ? n->height : 0; }
+    int balanceFactor(Node* n) {
+        return n ? height(n->left) - height(n->right) : 0;
+    }
+
+    void updateHeight(Node* n) {
+        n->height = 1 + max(height(n->left), height(n->right));
+    }
+
+    Node* rotateRight(Node* y) {
+        Node* x = y->left;
+        Node* T = x->right;
+
+        x->right = y;
+        y->left = T;
+
+        updateHeight(y);
+        updateHeight(x);
+        return x;
+    }
+  
+    Node* rotateLeft(Node* x) {
+        Node* y = x->right;
+        Node* T = y->left;
+        y->left = x;
+        x->right = T;
+        updateHeight(x);
+        updateHeight(y);
+        return y;
+    }
+
+    Node* balance(Node* n) {
+        updateHeight(n);
+        int bf = balanceFactor(n);
+        if (bf > 1) {
+            if (balanceFactor(n->left) < 0)
+                n->left = rotateLeft(n->left);
+            return rotateRight(n);
+        }
+
+        if (bf < -1) {
+            if (balanceFactor(n->right) > 0)
+                n->right = rotateRight(n->right);
+            return rotateLeft(n);
+        }
+        return n;
+    }
+    Node* insert(Node* node, double key, Product p) {
+        if (!node) return new Node(key, p);
+        if (key < node->key)
+            node->left = insert(node->left, key, p);
+        else if (key > node->key)
+            node->right = insert(node->right, key, p);
+        else
+            return node; 
+        return balance(node);
+    }
+
+    Node* findMin(Node* node) {
+        return node->left ? findMin(node->left) : node;
+    }
+
+    Node* removeMin(Node* node) {
+        if (!node->left)
+            return node->right;
+
+        node->left = removeMin(node->left);
+        return balance(node);
+    }
+  
+    Node* deleteNode(Node* node, double key) {
+        if (!node) return nullptr;
+        if (key < node->key)
+            node->left = deleteNode(node->left, key);
+        else if (key > node->key)
+            node->right = deleteNode(node->right, key);
+        else {
+            Node* L = node->left;
+            Node* R = node->right;
+            delete node;
+
+            if (!R) return L;
+
+            Node* min = findMin(R);
+            min->right = removeMin(R);
+            min->left = L;
+            return balance(min);
+        }
+
+        return balance(node);
+    }
+  
+    bool search(Node* node, double key) {
+        if (!node) return false;
+        if (key == node->key) return true;
+        else if (key < node->key) return search(node->left, key);
+        else return search(node->right, key);
+    }
+
+    void printInOrder(Node* node) {
+        if (!node) return;
+        printInOrder(node->left);
+        cout << node->product.name << " — " << node->product.price << endl;
+        printInOrder(node->right);
+    }
+    Product* findClosest(Node* node, double key, Product* best) {
+        if (!node) return best;
+
+        if (!best || fabs(node->key - key) < fabs(best->price - key))
+            best = &node->product;
+
+        if (key < node->key)
+            return findClosest(node->left, key, best);
+        else
+            return findClosest(node->right, key, best);
+    }
+    Product* findByPrice(Node* node, double key) {
+        if (!node) return nullptr;
+        if (node->key == key) return &node->product;
+        if (key < node->key) return findByPrice(node->left, key);
+        else return findByPrice(node->right, key);
+    }
+
+public:
+    void insert(double price, Product p) {
+        root = insert(root, price, p);
+    }
+    void remove(double price) {
+        root = deleteNode(root, price);
+    }
+    bool search(double price) {
+        return search(root, price);
+    }
+    void printInOrder() {
+        printInOrder(root);
+    }
+    Product* findClosest(double price) {
+        return findClosest(root, price, nullptr);
+    }
+    Product* findByPrice(double price) {
+        return findByPrice(root, price);
+    }
+};
+
+class ProductCatalog {
+private:
+    AVLTree tree;
+public:
+    void addProduct(string name, double price) {
+        tree.insert(price, Product(name, price));
+    }
+    Product* findProductByPrice(double price) {
+        return tree.findByPrice(price);
+    }
+    Product* findClosestByPrice(double price) {
+        return tree.findClosest(price);
+    }
+    void printAllInOrder() {
+        tree.printInOrder();
+    }
+};
+
+int main() {
+    ProductCatalog catalog;
+
+    catalog.addProduct("Laptop", 1200);
+    catalog.addProduct("Mouse", 25);
+    catalog.addProduct("Keyboard", 55);
+    catalog.addProduct("Monitor", 300);
+    catalog.addProduct("Headphones", 80);
+    cout << "Products sorted by price:\n";
+    catalog.printAllInOrder();
+    cout << "\nSearching price 55: ";
+    auto p = catalog.findProductByPrice(55);
+    if (p) cout << p->name << endl;
+    else cout << "Not found\n";
+    cout << "\nClosest to price 70: ";
+    auto c = catalog.findClosestByPrice(70);
+    if (c) cout << c->name << " — " << c->price << endl;
+
+    return 0;
+}
