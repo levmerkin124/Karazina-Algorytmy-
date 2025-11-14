@@ -1,0 +1,65 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+
+class MarksVector {
+private:
+    vector<int> marks;
+
+public:
+    MarksVector() {}
+
+    void addMark(int mark) {
+        marks.push_back(mark);
+    }
+
+    const vector<int>& getMarks() const {
+        return marks;
+    }
+
+    double calculateMedian() const {
+        if (marks.empty()) return 0.0;
+        vector<int> sortedMarks = marks; 
+        sort(sortedMarks.begin(), sortedMarks.end());
+        int n = sortedMarks.size();
+        if (n % 2 == 1) {
+            return sortedMarks[n / 2];
+        } else {
+            return (sortedMarks[n / 2 - 1] + sortedMarks[n / 2]) / 2.0;
+        }
+    }
+};
+
+class Student {
+private:
+    string name;
+    MarksVector marks;
+
+public:
+    Student(string name, const MarksVector& marks)
+        : name(name), marks(marks) {}
+
+    double calculateMedian() const {
+        return marks.calculateMedian();
+    }
+
+    void printInfo() const {
+        cout << "Student: " << name << endl;
+        cout << "Median mark: " << calculateMedian() << endl;
+    }
+};
+
+int main() {
+    MarksVector mv;
+    mv.addMark(90);
+    mv.addMark(75);
+    mv.addMark(82);
+    mv.addMark(100);
+    mv.addMark(60);
+
+    Student st("Lev Babak-Rybalko", mv);
+    st.printInfo();
+    return 0;
+}
