@@ -1,34 +1,58 @@
+-------------------------------
+Перше завдання індивідуального
+-------------------------------
+
+
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
 using namespace std;
 
+class IMarksStorage {
+public:
+    virtual void add(int mark) = 0;
+    virtual const vector<int>& get() const = 0;
+    virtual ~IMarksStorage() = default;
+};
+
+class VectorMarksStorage : public IMarksStorage {
+private:
+    vector<int> data;
+
+public:
+    void add(int mark) override {
+        data.push_back(mark);
+    }
+
+    const vector<int>& get() const override {
+        return data;
+    }
+};
 
 class MarksVector {
 private:
-    vector<int> marks;
+    IMarksStorage* storage;
 
 public:
-    MarksVector() {}
+    MarksVector(IMarksStorage* storage) : storage(storage) {}
 
     void addMark(int mark) {
-        marks.push_back(mark);
-    }
-
-    const vector<int>& getMarks() const {
-        return marks;
+        storage->add(mark);
     }
 
     double calculateMedian() const {
+        const auto& marks = storage->get();
         if (marks.empty()) return 0.0;
-        vector<int> sortedMarks = marks; 
+
+        vector<int> sortedMarks = marks;
         sort(sortedMarks.begin(), sortedMarks.end());
+
         int n = sortedMarks.size();
-        if (n % 2 == 1) {
+        if (n % 2 == 1)
             return sortedMarks[n / 2];
-        } else {
+        else
             return (sortedMarks[n / 2 - 1] + sortedMarks[n / 2]) / 2.0;
-        }
     }
 };
 
@@ -38,28 +62,66 @@ private:
     MarksVector marks;
 
 public:
-    Student(string name, const MarksVector& marks)
+    Student(string name, MarksVector marks)
         : name(name), marks(marks) {}
-
-    double calculateMedian() const {
-        return marks.calculateMedian();
-    }
 
     void printInfo() const {
         cout << "Student: " << name << endl;
-        cout << "Median mark: " << calculateMedian() << endl;
+        cout << "Median mark: " << marks.calculateMedian() << endl;
     }
 };
 
 int main() {
-    MarksVector mv;
+    auto* storage = new VectorMarksStorage();
+    MarksVector mv(storage);
     mv.addMark(90);
     mv.addMark(75);
     mv.addMark(82);
     mv.addMark(100);
     mv.addMark(60);
-
     Student st("Lev Babak-Rybalko", mv);
     st.printInfo();
+    delete storage;
+    return 0;
+}
+
+
+----------------------------------
+Друге завдання індивідуального
+----------------------------------
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    int removeElement(vector<int>& nums, int val) {
+        int k = 0;
+        for (int i = 0; i < nums.size(); i++) {
+            if (nums[i] != val) {
+                nums[k] = nums[i];
+                k++;
+            }
+        }
+        return k;
+    }
+};
+
+int main() {
+    vector<int> nums = {0, 1, 2, 2, 3, 0, 4, 2};
+    int val = 2;
+    Solution sol;
+    int k = sol.removeElement(nums, val);
+    cout << "k = " << k << endl;
+    cout << "nums after removal: ";
+    for (int i = 0; i < nums.size(); i++) {
+        if (i < k)
+            cout << nums[i] << " ";
+        else
+            cout << "_ ";
+    }
+    cout << endl;
+
     return 0;
 }
