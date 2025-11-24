@@ -157,7 +157,7 @@ int main() {
     Solution sol;
     int k = sol.removeElement(nums, val);
     cout << "k = " << k << endl;
-    cout << "nums after removal: ";
+    cout << "число після операції: ";
     for (int i = 0; i < nums.size(); i++) {
         if (i < k)
             cout << nums[i] << " ";
