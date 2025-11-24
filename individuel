@@ -5,54 +5,81 @@
 
 
 #include <iostream>
-#include <vector>
 #include <algorithm>
 using namespace std;
 
-class IMarksStorage {
-public:
-    virtual void add(int mark) = 0;
-    virtual const vector<int>& get() const = 0;
-    virtual ~IMarksStorage() = default;
-};
-
-class VectorMarksStorage : public IMarksStorage {
+class MarksStorage {
 private:
-    vector<int> data;
+    int* data;
+    int capacity;
+    int length;
 
-public:
-    void add(int mark) override {
-        data.push_back(mark);
+    void expand() {
+        int newCapacity = capacity * 2;
+        int* newData = new int[newCapacity];
+        for (int i = 0; i < length; i++)
+            newData[i] = data[i];
+        delete[] data;
+        data = newData;
+        capacity = newCapacity;
     }
 
-    const vector<int>& get() const override {
+public:
+    MarksStorage()
+        : capacity(4), length(0)
+    {
+        data = new int[capacity];
+    }
+
+    ~MarksStorage() {
+        delete[] data;
+    }
+
+    void add(int mark) {
+        if (length == capacity)
+            expand();
+        data[length++] = mark;
+    }
+
+    const int* get() const {
         return data;
+    }
+
+    int size() const {
+        return length;
     }
 };
 
 class MarksVector {
 private:
-    IMarksStorage* storage;
+    MarksStorage* storage;
 
 public:
-    MarksVector(IMarksStorage* storage) : storage(storage) {}
+    MarksVector(MarksStorage* storage)
+        : storage(storage) {}
 
     void addMark(int mark) {
         storage->add(mark);
     }
 
     double calculateMedian() const {
-        const auto& marks = storage->get();
-        if (marks.empty()) return 0.0;
+        int n = storage->size();
+        if (n == 0) return 0.0;
 
-        vector<int> sortedMarks = marks;
-        sort(sortedMarks.begin(), sortedMarks.end());
+        int* arr = new int[n];
+        const int* src = storage->get();
+        for (int i = 0; i < n; i++) arr[i] = src[i];
 
-        int n = sortedMarks.size();
+        sort(arr, arr + n);
+
+        double med;
         if (n % 2 == 1)
-            return sortedMarks[n / 2];
+            med = arr[n / 2];
         else
-            return (sortedMarks[n / 2 - 1] + sortedMarks[n / 2]) / 2.0;
+            med = (arr[n / 2 - 1] + arr[n / 2]) / 2.0;
+
+        delete[] arr;
+        return med;
     }
 };
 
@@ -72,7 +99,7 @@ public:
 };
 
 int main() {
-    auto* storage = new VectorMarksStorage();
+    auto* storage = new MarksStorage();
     MarksVector mv(storage);
     mv.addMark(90);
     mv.addMark(75);
@@ -84,7 +111,6 @@ int main() {
     delete storage;
     return 0;
 }
-
 
 ----------------------------------
 Друге завдання індивідуального
